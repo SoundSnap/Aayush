@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SoundSnap</title>
+  <link rel="icon" sizes="192x192" href="./icons/web-app-manifest-192x192.png">
+  <link rel="icon" sizes="512x512" href="./icons/web-app-manifest-512x512.png">
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-size: cover;
+      background-position: center;
+      transition: background-image 0.5s ease; 
+    }
+
+    /* Preload all background images */
+    body::before {
+      content: '';
+      position: absolute;
+      top: -9999px;
+      left: -9999px;
+      background-image: 
+        url('./media/aa (1).jpg'), 
+        url('./media/aa (1).jpg'), 
+        url('./media/aa (21).jpg'), 
+        url('./media/aa (7).jpg'), 
+        url('./media/aa (2).jpg'), 
+        url('./media/aa (9).jpg'), 
+        url('./media/aa (19).jpg');
+    }
+
+    /* Background classes for each song */
+    .bg-song1 { background-image: url('./media/aa (1).jpg'); }
+    .bg-song2 { background-image: url('./media/aa (1).jpg'); }
+    .bg-song3 { background-image: url('./media/aa (21).jpg'); }
+    .bg-song4 { background-image: url('./media/aa (7).jpg'); }
+    .bg-song5 { background-image: url('./media/aa (2).jpg'); }
+    .bg-song6 { background-image: url('./media/aa (9).jpg'); }
+    .bg-song7 { background-image: url('./media/aa (19).jpg'); }
+
+    .music-player {
+      width: 250px;
+      height: 450px;
+      background: rgba(255, 255, 255, 0.25);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px;
+      box-shadow: 0 8px 32px rgba(31, 38, 135, 0.2);
+      text-align: center;
+    }
+
+    @keyframes float {
+      0%, 100% {
+        transform: translateY(0);
+      }
+      50% {
+        transform: translateY(-10px);
+      }
+    }
+
+    .music-player img {
+      width: 100%;
+      height: 200px;
+      border-radius: 10px;
+      object-fit: cover;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+    
+    .song-title {
+      font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+      font-size: 18px;
+      font-weight: bold;
+      color: #fff;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+      margin-top: 15px;
+    }
+
+    .progress-container {
+      width: 100%;
+      height: 6px;
+      background-color: rgba(255, 255, 255, 0.3);
+      border-radius: 3px;
+      margin-top: 15px;
+      margin-bottom: 5px;
+      position: relative;
+      cursor: pointer;
+    }
+
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(to right, #f9c5d1, #f0a2c2);
+      width: 0%;
+      border-radius: 3px;
+      transition: width 0.1s linear;
+    }
+
+    .time-display {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      color: #fff;
+      font-size: 12px;
+      margin-bottom: 10px;
+    }
+
+    .controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+    }
+
+    .play-btn {
+      background: rgba(255, 255, 255, 0.2);
+      border: 2px solid #fff;
+      border-radius: 50%;
+      color: #fff;
+      font-size: 18px;
+      width: 44px;
+      height: 44px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      transition: 0.3s;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .next-btn, .prev-btn {
+      background: rgba(255, 255, 255, 0.1);
+      border: 2px solid rgba(255, 255, 255, 0.5);
+      border-radius: 50%;
+      color: #ffffff;
+      font-size: 16px;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      transition: 0.3s;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    }
+
+    .play-btn:hover, .next-btn:hover, .prev-btn:hover {
+      background-color: rgba(255, 255, 255, 0.4);
+      transform: scale(1.05);
+    }
+
+    .note-section {
+      width: 90%;
+      background: rgba(255, 255, 255, 0.3);
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
+      border-radius: 10px;
+      padding: 8px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      font-size: 14px;
+      font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+      color: #fff;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+      margin-top: 15px;
+    }
+
+
+
+    .song-container {
+      display: none;
+    }
+
+    .back-button {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      display: inline-block;
+      padding: 12px 30px;
+      font-size: 16px;
+      font-weight: 600;
+      color: white;
+      text-decoration: none;
+      background: rgba(255, 255, 255, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-radius: 50px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+      transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.3s ease;
+      z-index: 1000;
+    }
+
+    .back-button:hover {
+      transform: scale(1.05);
+      background: rgba(255, 255, 255, 0.25);
+      box-shadow: 0 0 15px 4px rgba(255, 255, 255, 0.3);
+    }
+  </style>
+</head>
+<body class="bg-song1">
+  <div id="app">
+    <!-- Song 1 -->
+    <div class="music-player song-container" id="song1">
+      <img src="./media/aa (3).jpg" alt="Album Art">
+      <div class="song-title">NETAJI</div>
+      <audio id="audio1" src="as (1).mp3"></audio>
+      <div class="progress-container" id="progress-container1">
+        <div class="progress-bar" id="progress-bar1"></div>
+      </div>
+      <div class="time-display">
+        <div class="current-time" id="current-time1">0:00</div>
+        <div class="total-time" id="total-time1">0:00</div>
+      </div>
+      <div class="controls">
+        <button class="prev-btn" id="prev-btn1"><</button>
+        <button class="play-btn" id="play-btn1">▶</button>
+        <button class="next-btn" id="next-btn1">></button>
+      </div>
+      <div class="note-section" id="note-section1">दिन बीत जाते है सुहानी यादें बनकर,
+बाते रह जाती है कहानी बनकर,
+पर दोस्त तो हमेशा दिल के करीब रहते है,
+कभी मुस्कान तो कभी,
+आँखों का पानी बनकर।</div>
+    </div>
+
+    <!-- Song 2 -->
+    <div class="music-player song-container" id="song2">
+      <img src="./media/aa (14).jpg" alt="Album Art">
+      <div class="song-title">BADMOSH</div>
+      <audio id="audio2" src="as (2).mp3"></audio>
+      <div class="progress-container" id="progress-container2">
+        <div class="progress-bar" id="progress-bar2"></div>
+      </div>
+      <div class="time-display">
+        <div class="current-time" id="current-time2">0:00</div>
+        <div class="total-time" id="total-time2">0:00</div>
+      </div>
+      <div class="controls">
+        <button class="prev-btn" id="prev-btn2"><</button>
+        <button class="play-btn" id="play-btn2">▶</button>
+        <button class="next-btn" id="next-btn2">></button>
+      </div>
+      <div class="note-section" id="note-section2">कहीं अंधेरा तो कहीं शाम होगी,
+मेरी हर ख़ुशी तेरे नाम होगी,
+कभी मांग कर तो देख हमसे ए दोस्त,
+होंठो पर हसीं और हथेली पर जान होगी</div>
+    </div>
+
+    <!-- Song 3 -->
+    <div class="music-player song-container" id="song3">
+      <img src="./media/aa (21).jpg" alt="Album Art">
+      <div class="song-title">😶‍🌫️😶‍🌫️😶‍🌫️😶‍🌫️</div>
+      <audio id="audio3" src="as (3).mp3"></audio>
+      <div class="progress-container" id="progress-container3">
+        <div class="progress-bar" id="progress-bar3"></div>
+      </div>
+      <div class="time-display">
+        <div class="current-time" id="current-time3">0:00</div>
+        <div class="total-time" id="total-time3">0:00</div>
+      </div>
+      <div class="controls">
+        <button class="prev-btn" id="prev-btn3"><</button>
+        <button class="play-btn" id="play-btn3">▶</button>
+        <button class="next-btn" id="next-btn3">></button>
+      </div>
+      <div class="note-section" id="note-section3">लोग रूप देखते है ,हम दिल देखते है ,
+लोग सपने देखते है हम हक़ीकत देखते है,
+लोग दुनिया मे दोस्त देखते है,
+हम दोस्तो मे दुनिया देखते है।</div>
+    </div>
+
+    <!-- Song 4 -->
+    <div class="music-player song-container" id="song4">
+      <img src="./media/aa (8).jpg" alt="Album Art">
+      <div class="song-title"> JIM KARE </div>
+      <audio id="audio4" src="as (4).mp3"></audio>
+      <div class="progress-container" id="progress-container4">
+        <div class="progress-bar" id="progress-bar4"></div>
+      </div>
+      <div class="time-display">
+        <div class="current-time" id="current-time4">0:00</div>
+        <div class="total-time" id="total-time4">0:00</div>
+      </div>
+      <div class="controls">
+        <button class="prev-btn" id="prev-btn4"><</button>
+        <button class="play-btn" id="play-btn4">▶</button>
+        <button class="next-btn" id="next-btn4">></button>
+      </div>
+      <div class="note-section" id="note-section4">Kheench Kar Utaar Dete Hain Umar Ki Chaadar,
+Ye Kambakht Dost Kabhi Boodha Nahi Hone Dete</div>
+    </div>
+
+    <!-- Song 5 -->
+    <div class="music-player song-container" id="song5">
+      <img src="./media/aa (13).jpg" alt="Album Art">
+      <div class="song-title">SHERRR</div>
+      <audio id="audio5" src="as (5).mp3"></audio>
+      <div class="progress-container" id="progress-container5">
+        <div class="progress-bar" id="progress-bar5"></div>
+      </div>
+      <div class="time-display">
+        <div class="current-time" id="current-time5">0:00</div>
+        <div class="total-time" id="total-time5">0:00</div>
+      </div>
+      <div class="controls">
+        <button class="prev-btn" id="prev-btn5"><</button>
+        <button class="play-btn" id="play-btn5">▶</button>
+        <button class="next-btn" id="next-btn5">></button>
+      </div>
+      <div class="note-section" id="note-section5">महसूस करो तो “दोस्त” कहना,
+छलकूं तो “जज़्बात”
+बदलूँ तो, मुझे ‘वक़्त’ कहना,
+थम जाऊँ तो “हालात”</div>
+    </div>
+
+    <!-- Song 6 -->
+    <div class="music-player song-container" id="song6">
+      <img src="./media/aa (20).jpg" alt="Album Art">
+      <div class="song-title"> BHAICHARA</div>
+      <audio id="audio6" src="as (6).mp3"></audio>
+      <div class="progress-container" id="progress-container6">
+        <div class="progress-bar" id="progress-bar6"></div>
+      </div>
+      <div class="time-display">
+        <div class="current-time" id="current-time6">0:00</div>
+        <div class="total-time" id="total-time6">0:00</div>
+      </div>
+      <div class="controls">
+        <button class="prev-btn" id="prev-btn6"><</button>
+        <button class="play-btn" id="play-btn6">▶</button>
+        <button class="next-btn" id="next-btn6">></button>
+      </div>
+      <div class="note-section" id="note-section6">वो कोई दोस्त था अच्छे दिनों का,
+जो पिछली रात से याद आ रहा है।</div>
+    </div>
+
+    <!-- Song 7 -->
+    <div class="music-player song-container" id="song7">
+      <img src="./media/aa (18).jpg" alt="Album Art">
+      <div class="song-title">SHUKRIYA</div>
+      <audio id="audio7" src="as (7).mp3"></audio>
+      <div class="progress-container" id="progress-container7">
+        <div class="progress-bar" id="progress-bar7"></div>
+      </div>
+      <div class="time-display">
+        <div class="current-time" id="current-time7">0:00</div>
+        <div class="total-time" id="total-time7">0:00</div>
+      </div>
+      <div class="controls">
+        <button class="prev-btn" id="prev-btn7"><</button>
+        <button class="play-btn" id="play-btn7">▶</button>
+        <button class="next-btn" id="next-btn7">></button>
+      </div>
+      <div class="note-section" id="note-section7">शर्तें लगाई जाती नहीं दोस्ती के साथ,
+कीजिये मुझे क़ुबूल मेरी हर कमी के साथ।</div>
+    </div>
+    
+    <a href="landing.html" class="back-button">Back</a>
+  </div>
+
+  <script>
+    // Preload background images
+    function preloadBackgroundImages() {
+      const backgroundImages = [
+        './media/aa (1).jpg',
+        './media/aa (1).jpg',
+        './media/aa (21).jpg',
+        './media/aa (7).jpg',
+        './media/aa (2).jpg',
+        './media/aa (9).jpg',
+        './media/aa (19).jpg'
+      ];
+
+      backgroundImages.forEach(imageSrc => {
+        const img = new Image();
+        img.src = imageSrc;
+      });
+    }
+
+    // Call preload function immediately
+    preloadBackgroundImages();
+
+    // JavaScript logic to control song switching and progress
+    let currentSongIndex = 1;
+
+    const songs = ['song1', 'song2', 'song3', 'song4', 'song5', 'song6', 'song7'];
+    const backgroundClasses = ['bg-song1', 'bg-song2', 'bg-song3', 'bg-song4', 'bg-song5', 'bg-song6', 'bg-song7'];
+
+    // Function to format time in minutes:seconds
+    function formatTime(seconds) {
+      if (isNaN(seconds) || seconds === Infinity) return "0:00";
+      const minutes = Math.floor(seconds / 60);
+      const secs = Math.floor(seconds % 60);
+      return `${minutes}:${secs < 10 ? '0' : ''}${secs}`;
+    }
+
+    // Pre-load all audio metadata when page loads
+    function preloadAudioMetadata() {
+      for (let i = 1; i <= songs.length; i++) {
+        const audioPlayer = document.getElementById("audio" + i);
+        const totalTimeDisplay = document.getElementById("total-time" + i);
+        
+        // Force load metadata
+        audioPlayer.preload = "metadata";
+        
+        // Set up event listener for metadata loaded
+        audioPlayer.addEventListener("loadedmetadata", function() {
+          totalTimeDisplay.textContent = formatTime(audioPlayer.duration);
+        });
+        
+        // For browsers that might have already loaded the metadata
+        if (audioPlayer.readyState >= 2) {
+          totalTimeDisplay.textContent = formatTime(audioPlayer.duration);
+        } else {
+          // Try loading a small segment to trigger metadata loading
+          audioPlayer.load();
+        }
+      }
+    }
+
+    // Call pre-load function when page loads
+    window.addEventListener("DOMContentLoaded", preloadAudioMetadata);
+
+    function updatePlayer(songIndex) {
+      // Hide all songs
+      songs.forEach(song => {
+        document.getElementById(song).style.display = "none";
+        const audio = document.getElementById("audio" + song.substring(4));
+        audio.pause();
+        const playBtn = document.getElementById("play-btn" + song.substring(4));
+        playBtn.textContent = "▶";
+      });
+
+      // Show current song
+      const currentSong = songs[songIndex - 1];
+      document.getElementById(currentSong).style.display = "block";
+
+      // Change background by updating CSS class
+      document.body.className = backgroundClasses[songIndex - 1];
+
+      // Get elements for current song
+      const playBtn = document.getElementById("play-btn" + songIndex);
+      const audioPlayer = document.getElementById("audio" + songIndex);
+      const progressBar = document.getElementById("progress-bar" + songIndex);
+      const progressContainer = document.getElementById("progress-container" + songIndex);
+      const currentTimeDisplay = document.getElementById("current-time" + songIndex);
+      const totalTimeDisplay = document.getElementById("total-time" + songIndex);
+
+      // Ensure total time is displayed
+      if (audioPlayer.duration) {
+        totalTimeDisplay.textContent = formatTime(audioPlayer.duration);
+      } else {
+        audioPlayer.addEventListener("loadedmetadata", () => {
+          totalTimeDisplay.textContent = formatTime(audioPlayer.duration);
+        });
+        audioPlayer.load();
+      }
+
+      // Update time display and progress bar during playback
+      audioPlayer.addEventListener("timeupdate", () => {
+        if (audioPlayer.duration) {
+          const progressPercent = (audioPlayer.currentTime / audioPlayer.duration) * 100;
+          progressBar.style.width = `${progressPercent}%`;
+          currentTimeDisplay.textContent = formatTime(audioPlayer.currentTime);
+        }
+      });
+
+      // Allow seeking by clicking on progress bar
+      progressContainer.addEventListener("click", (e) => {
+        const seekPosition = e.offsetX / progressContainer.clientWidth;
+        audioPlayer.currentTime = seekPosition * audioPlayer.duration;
+      });
+
+      // Reset progress when song ends
+      audioPlayer.addEventListener("ended", () => {
+        progressBar.style.width = '0%';
+        playBtn.textContent = "▶";
+        nextSong();
+      });
+
+      // Clear old event listeners to prevent duplicates
+      const newPlayBtn = playBtn.cloneNode(true);
+      playBtn.parentNode.replaceChild(newPlayBtn, playBtn);
+      
+      // Play/Pause functionality
+      newPlayBtn.addEventListener("click", () => {
+        if (audioPlayer.paused) {
+          audioPlayer.play();
+          newPlayBtn.textContent = "||";
+        } else {
+          audioPlayer.pause();
+          newPlayBtn.textContent = "▶";
+        }
+      });
+    }
+
+    // Initial Song Display
+    updatePlayer(currentSongIndex);
+
+    // Next Song
+    function nextSong() {
+      currentSongIndex = (currentSongIndex % songs.length) + 1;
+      updatePlayer(currentSongIndex);
+    }
+
+    // Previous Song
+    function prevSong() {
+      currentSongIndex = (currentSongIndex - 1 + songs.length) % songs.length || songs.length;
+      updatePlayer(currentSongIndex);
+    }
+
+    // Event listeners for next and previous buttons
+    for (let i = 1; i <= songs.length; i++) {
+      document.getElementById("next-btn" + i).addEventListener("click", nextSong);
+      document.getElementById("prev-btn" + i).addEventListener("click", prevSong);
+    }
+  </script>
+</body>
+</html>
